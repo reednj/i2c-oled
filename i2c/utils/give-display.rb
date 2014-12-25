@@ -7,20 +7,30 @@ SIG = 'SIGUSR1'
 
 def main
 	if ARGV.length ==0
-		puts "use a string argument to give the first process that matches control of its i2c bus"
+		puts "Usage: give-display <process name or keyword>"
 		return 1
 	end
 
 	search_for = ARGV[0]
-	pids = `pgrep -f "#{search_for}"`
-	pid = pids.split("\n").first.to_i
+	pid = get_pids(search_for).first
 
 	if pid.nil? || pid == 0 || pid == Process.pid
 		puts "no pid found for '#{search_for}'"
 		return 1
 	end
 
-	`kill -#{SIG.upcase} #{pid}`
+	Process.kill SIG.upcase, pid
+end
+
+def get_pids search_for
+	pids = `pgrep -f "#{search_for}"`
+	pids.split("\n").map do |p| 
+		if p.to_i == Process.pid || p.to_i == Process.ppid
+			nil
+		else
+			p.to_i
+		end
+	end
 end
 
 main()
