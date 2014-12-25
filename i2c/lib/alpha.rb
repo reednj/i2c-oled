@@ -127,8 +127,14 @@ class AlphaDisplay
 
 		# init the device to the default state, if thats what we want
 		if should_init
-			@device.write HT16K33_SYSTEM_SETUP | HT16K33_OSCILLATOR
+			self.display_init
 		end
+	end
+
+	def display_init
+		@device.write HT16K33_SYSTEM_SETUP | HT16K33_OSCILLATOR
+		self.stop_blink
+		self.brightness = 1
 	end
 
 	def self.open(device_id = DEVICE_ID)
@@ -223,7 +229,11 @@ class AlphaDisplayShared < AlphaDisplay
 
 		pid_path = (Gem.win_platform?) ? './' : '/var/run/i2c'
 		raise "expected i2c directory doesn't exist at '#{pid_path}'" if !Dir.exists? pid_path
-		@pid_lock = PIDLock.new File.join(pid_path, "i2c-#{device_id.to_s 16}.pid")
+		
+		lock_file = File.join(pid_path, "i2c-#{device_id.to_s 16}.pid")
+		self.display_init if !File.exist? lock_file
+
+		@pid_lock = PIDLock.new lock_file
 		@pid_lock.take_lock
 		@last_value = nil
 

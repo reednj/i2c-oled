@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-load './lib/alpha'
+require './lib/alpha'
 
 def main()
 	if ARGV.length == 0
@@ -14,6 +14,8 @@ def main()
 	case command
 	when :off
 		display.blank
+	when :init
+		display.display_init
 	when :set
 		value = ARGV[1]
 		display.set value
@@ -33,6 +35,7 @@ def usage
 	"alpha <cmd> [<value>]\n" +
 	" commands:\n" +
 	"  off\n" +
+	"  init\n" +
 	"  set <string>\n" +
 	"  bright <0-15>\n"
 end
