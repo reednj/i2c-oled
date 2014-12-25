@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name='viewport' content='width=device-width' />
+
+<title>rpi controller</title>
+
+<style type='text/css'>
+	.keypad {
+		margin: 0 auto;
+		text-align: center;
+	}
+
+	.keypad input {
+		font-size: 2.5em;
+		padding: 4px;
+		width: 100px;
+		height: 100px;
+		margin: 8px;
+		text-align: center;
+	}
+
+</style>
+
+
+<script src='//cdnjs.cloudflare.com/ajax/libs/mootools/1.4.5/mootools-core-full-compat-yc.js' type='text/javascript'></script>
+
+<script type='text/javascript'>
+	window.addEvent('domready', function() {
+		Ui.initialize.bind(Ui)();
+	});
+
+	var Ui = {
+		initialize: function() {
+			document.getElements('.keypad input').each(function(input) {
+				input.addEvent('click', function() {
+					Ui.buttonClick.bind(Ui)(input);
+				});
+			});
+		},
+
+		buttonClick: function(input) {
+			var n = input.value.toInt();
+			this.setNumber(n);
+		},
+
+		setNumber: function(n) {
+			//this.disableAll();
+			new Request({
+				url: '/set/' + n,
+				onComplete: function() {
+					//this.enableAll();
+				}.bind(Ui),
+				onFailure: function() {
+					alert('request failed');
+				}
+			}).get();
+		},
+
+		disableAll: function() {
+			this.setDisabled(true);
+		},
+
+		enableAll: function() {
+			this.setDisabled(false);
+		},
+
+		setDisabled: function(isDisabled) {
+			document.getElements('.keypad input').set('disabled', isDisabled);
+		}
+	}
+</script>
+
+</head>
+
+<body>
+
+<div class='keypad'>
+	<div>
+		<input type='button' value='1'/>
+		<input type='button' value='2'/>
+		<input type='button' value='3'/>
+	</div>
+	<div>
+		<input type='button' value='4'/>
+		<input type='button' value='5'/>
+		<input type='button' value='6'/>
+	</div>
+	<div>
+		<input type='button' value='7'/>
+		<input type='button' value='8'/>
+		<input type='button' value='9'/>
+	</div>
+	<div>
+		<input type='button' value='0'/>
+	</div>
+
+<div>
+
+</body>
+</html>
