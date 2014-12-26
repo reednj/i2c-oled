@@ -121,6 +121,7 @@ class AlphaDisplay
 		@device = WiringPi::I2C.new device_id
 		@buffer_size = 16
 		@buffer = []
+		@device_id = device_id
 
 		self.debug = false
 		self.clear
@@ -242,29 +243,43 @@ class AlphaDisplayShared < AlphaDisplay
 
 		# register the script in a subdirectory of i2c so that we have a list
 		# of what wants access to the display
-		register_script device_id
+		register_script()
 
 		# when the process gets SIGUSR1 we take the lock by upating the .pid file
 		# this will let us update the display, and stop any other processes from
 		# interferring.
 		sig = (Gem.win_platform?) ? 'INT' : 'USR1'
-		Signal.trap sig do |signo|
+		Signal.trap sig do
 			@pid_lock.take_lock
 			set @last_value 
 		end
+
+		Signal.trap 'TERM' do 
+			deregister_script()
+			exit
+		end
+
 	end
 
 	# we register the script in the /var/run/i2c structure, so that we
 	# can create programs to cycle through everything that is using the
 	# display
-	def register_script(device_id)
-		reg_path = (Gem.win_platform?) ? './' : "/var/run/i2c/#{device_id.to_s 16}"
+	def register_script
 		name = ProcessHelper.script_name
 		raise "Expected directory #{reg_path} does not exist" if !Dir.exist? reg_path
 		raise "could not generate script name" if name.nil? || name == ''
 		
-		reg_file = File.join reg_path, "#{name}.pid"
-		File.write reg_file, "#{Process.pid}\n"
+		@reg_file = File.join reg_path, "#{name}.pid"
+		File.write @reg_file, "#{Process.pid}\n"
+	end
+
+	def deregister_script
+		raise 'no script registered' if @reg_file.nil? || !File.exist?(@reg_file)
+		File.delete @reg_file
+	end
+
+	def reg_path
+		(Gem.win_platform?) ? './' : "/var/run/i2c/#{@device_id.to_s 16}"
 	end
 
 	def set(s, rjust = true)
