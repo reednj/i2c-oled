@@ -1,5 +1,6 @@
 
 
+
 class TimeSpan
 	def initialize(value)
 		@value = value.to_f
@@ -92,6 +93,12 @@ class PIDLock < SharedVariable
 
 	def take_lock
 		self.set "#{Process.pid}\n"
+	end
+end
+
+class ProcessHelper
+	def self.script_name
+		$PROGRAM_NAME.split('/').last.gsub('.rb','')
 	end
 end
 
