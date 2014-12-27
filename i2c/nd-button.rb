@@ -7,30 +7,39 @@ rescue Exception => e
 end
 
 def main
-	pin = 3
-	gpio = WiringPi::GPIO.new
-	gpio.pin_mode pin, WiringPi::INPUT
-	gpio.pull_up_dn_control pin, WiringPi::PUD_UP
-
-	on_key_down gpio, pin do
+	wiringpi_pin = 3
+	input = GPIOInput.new wiringpi_pin, WiringPi::PUD_UP
+	input.on_key_down do
 		# assume the next-display script is alredy defined in the correct place
 		puts `/home/reednj/bin/nd`
 	end
 end
 
-def on_key_down(gpio, pin)
-	delay = 0.1
+class GPIOInput
+	def initialize(pin, pull_type)
+		@pin = pin
+		@gpio = WiringPi::GPIO.new
+		@gpio.pin_mode @pin, WiringPi::INPUT
+		@gpio.pull_up_dn_control @pin, pull_type
+	end
 
-	last_value = gpio.digital_read pin
-	loop do
-		value = gpio.digital_read(pin) 
-		
-		if value != last_value
-			yield if last_value == 1 and value == 0
+	def on_key_down(poll_delay=0.1)
+
+		last_value = self.read
+		loop do
+			value = self.read 
+			
+			if value != last_value
+				yield if last_value == 1 and value == 0
+			end
+			
+			last_value = value
+			sleep poll_delay
 		end
-		
-		last_value = value
-		sleep delay
+	end
+
+	def read
+		@gpio.digital_read @pin
 	end
 end
 

@@ -199,6 +199,19 @@ class Dir
 	end
 end
 
+module Process
+	def self.exist? pid
+		return true if Gem.win_platform?
+
+		begin
+			Process.getpgid pid
+			true
+		rescue Errno::ESRCH
+			false
+		end
+	end
+end
+
 class ProcessHelper
 	def self.script_name
 		$PROGRAM_NAME.split('/').last.gsub('.rb','')
