@@ -236,14 +236,18 @@ class AlphaDisplayShared < AlphaDisplay
 		lock_file = File.join(pid_path, "i2c-#{device_id.to_s 16}.pid")
 		self.display_init if !File.exist? lock_file
 
-		# the lock file will be created if it doesn't exist yet
+		# the lock file will be created if it doesn't exist yet, and we will take the
+		# display straight away, so the user knows something is happening...
 		@pid_lock = PIDLock.new lock_file
 		@pid_lock.take_lock
 		@last_value = nil
 
 		# register the script in a subdirectory of i2c so that we have a list
 		# of what wants access to the display
-		register_script()
+		registry_path = File.join(pid_path, device_id.to_s(16))
+		self.create_registry_dir registry_path
+		pid_registry = PIDRegistry.new registry_path
+		pid_registry.register_script()
 
 		# when the process gets SIGUSR1 we take the lock by upating the .pid file
 		# this will let us update the display, and stop any other processes from
@@ -255,31 +259,14 @@ class AlphaDisplayShared < AlphaDisplay
 		end
 
 		Signal.trap 'TERM' do 
-			deregister_script()
+			pid_registry.deregister_script()
 			exit
 		end
 
 	end
 
-	# we register the script in the /var/run/i2c structure, so that we
-	# can create programs to cycle through everything that is using the
-	# display
-	def register_script
-		name = ProcessHelper.script_name
-		raise "Expected directory #{reg_path} does not exist" if !Dir.exist? reg_path
-		raise "could not generate script name" if name.nil? || name == ''
-		
-		@reg_file = File.join reg_path, "#{name}.pid"
-		File.write @reg_file, "#{Process.pid}\n"
-	end
-
-	def deregister_script
-		raise 'no script registered' if @reg_file.nil? || !File.exist?(@reg_file)
-		File.delete @reg_file
-	end
-
-	def reg_path
-		(Gem.win_platform?) ? './' : "/var/run/i2c/#{@device_id.to_s 16}"
+	def create_registry_dir(path)
+		Dir.mkdir path if !Dir.exist? path 
 	end
 
 	def set(s, rjust = true)

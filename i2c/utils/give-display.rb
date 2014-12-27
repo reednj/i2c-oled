@@ -3,7 +3,6 @@
 # This creates a directory in the /var/run tmpfs so that we can store
 # pid files for i2c applications.
 #
-SIG = 'SIGUSR1'
 
 def main
 	if ARGV.length ==0
@@ -19,7 +18,7 @@ def main
 		return 1
 	end
 
-	Process.kill SIG.upcase, pid
+	PIDLock.give_lock pid
 end
 
 def get_pids search_for
