@@ -3,26 +3,38 @@
 #
 #
 
-require_relative '../lib/alpha'
+require_relative '../lib/helpers'
 
 def main
-	display_id = 0x70
 	base_path = (Gem.win_platform?) ? '../' : '/var/run/i2c'
-	pid_registry = PIDRegistry.new File.join(base_path, display_id.to_s(16))
-	pid_lock = PIDLock.new File.join(base_path, "i2c-#{display_id.to_s(16)}.pid")
+	p = PIDRegistryHelper.new base_path
+	p.give_to_next
+end
 
-	current_index = pid_registry.index_of(pid_lock.pid)
-	current_index ||= 0 # if the current owner has stopped running, or is not registered
+class PIDRegistryHelper
+	def initialize(base_path, display_id = 0x70)
+		@pid_registry = PIDRegistry.new File.join(base_path, display_id.to_s(16))
+		@pid_lock = PIDLock.new File.join(base_path, "i2c-#{display_id.to_s(16)}.pid")
+	end
 
-	# will automatically loop around if it is beyond the range of the array
-	r = pid_registry.get(current_index + 1)
-	raise "no processes registered at #{base_path}" if r.nil?
+	def give_to_next
+		current_index = @pid_registry.index_of(@pid_lock.pid)
+		current_index ||= 0 # if the current owner has stopped running, or is not registered
 
-	if Process.exist? r[:pid]
-		PIDLock.give_lock r[:pid]
-		puts "display given to #{r[:name]}"
-	else
-		puts "pid '#{r[:pid]}' does not exist"
+		# will automatically loop around if it is beyond the range of the array
+		r = @pid_registry.get(current_index + 1)
+		raise "no processes registered at #{base_path}" if r.nil?
+
+		if Process.exist? r[:pid]
+			PIDLock.give_lock r[:pid]
+			puts "display given to #{r[:name]}"
+		else
+			puts "pid '#{r[:pid]}' does not exist"
+		end
+	end
+
+	def refresh
+		@pid_registry.load
 	end
 end
 

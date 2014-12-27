@@ -4,6 +4,8 @@
 # pid files for i2c applications.
 #
 
+require_relative '../lib/helpers'
+
 def main
 	if ARGV.length ==0
 		puts "Usage: give-display <process name or keyword>"
