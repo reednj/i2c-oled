@@ -23,6 +23,13 @@ module WiringPi
 
 		def pin_mode(pin, mode)
 		end
+
+		def pull_up_dn_control(pin, type)
+		end
+
+		def digital_read(pint)
+			0
+		end
 	end
 
 	class I2C

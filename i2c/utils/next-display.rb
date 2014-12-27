@@ -8,7 +8,8 @@ require_relative '../lib/helpers'
 def main
 	base_path = (Gem.win_platform?) ? '../' : '/var/run/i2c'
 	p = PIDRegistryHelper.new base_path
-	p.give_to_next
+	r = p.give_to_next
+	puts "display given to #{r[:name]}" if !r.nil?
 end
 
 class PIDRegistryHelper
@@ -27,9 +28,10 @@ class PIDRegistryHelper
 
 		if Process.exist? r[:pid]
 			PIDLock.give_lock r[:pid]
-			puts "display given to #{r[:name]}"
+			return r
 		else
-			puts "pid '#{r[:pid]}' does not exist"
+			raise "pid '#{r[:pid]}' does not exist"
+			return nil
 		end
 	end
 
