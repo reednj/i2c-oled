@@ -8,10 +8,10 @@ begin
 		end
 	end
 rescue Exception => e
-	require './lib/wiringpi-test'
+	require_relative 'wiringpi-test'
 end
 
-require './lib/helpers'
+require_relative 'helpers'
 
 class Time
 	def to_alpha

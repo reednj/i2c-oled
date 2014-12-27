@@ -1,4 +1,4 @@
-require './lib/alpha'
+require_relative 'lib/alpha'
 
 display = AlphaDisplayShared.new
 update_loop do

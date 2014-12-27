@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require './lib/alpha'
+require_relative 'lib/alpha'
 
 def main()
 	if ARGV.length == 0

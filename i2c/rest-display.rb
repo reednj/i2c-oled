@@ -1,5 +1,5 @@
 require 'rest-client'
-require './lib/alpha'
+require_relative 'lib/alpha'
 
 config = {
 	:url => 'http://admin:Hamb0rG@reddit-stream.com/admin/info/revenue/this_month',
