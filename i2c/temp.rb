@@ -1,17 +1,27 @@
 require_relative 'lib/alpha'
 
 def main
+	i = 0
+	hidden_delay = 60
+
 	display = AlphaDisplayShared.new
 	sensor = Therm1Wire.new
 
-	update_loop 1.0 do
-		t = sensor.read
+	loop do
+		# when the display is show, refresh the sensor every second, when its not
+		# we only refresh every minute or so
+		if display.has_display? || i % hidden_delay == 0
+			t = sensor.read
+			puts t
+		end
+		
 		if !t.nil?
 			s = t.round(1).to_s + 'c'
 			display.set s
 		end
-
-		puts t
+		
+		i += 1
+		sleep 1.0
 	end
 end
 
