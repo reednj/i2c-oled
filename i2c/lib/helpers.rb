@@ -57,7 +57,7 @@ class TimeSpan
 end
 
 class SharedVariable
-	def initialize(path)
+	def initialize(path, mode=0664)
 		@value = nil
 		@path = path
 		@last_mtime = nil
@@ -67,12 +67,15 @@ class SharedVariable
 		# create the file if it doesn't exist yet
 		if !File.exist? @path
 			File.write(@path, '')
+			File.chmod mode, @path
 		end
 	end
 
 	def get
 		# only re-read the file data if the mtime has changed
-		mtime = File.mtime(@path)
+		return nil if !File.exist? @path
+		mtime = File.mtime @path
+
 		if @last_mtime.nil? || @last_mtime < mtime
 			@value = File.read(@path)
 			@last_mtime = mtime
