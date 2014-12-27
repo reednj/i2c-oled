@@ -266,11 +266,15 @@ class AlphaDisplayShared < AlphaDisplay
 	end
 
 	def create_registry_dir(path)
-		Dir.mkdir path if !Dir.exist? path 
+		Dir.mkdir path if !Dir.exist? path
+	end
+
+	def has_display?
+		@pid_lock.has_lock?
 	end
 
 	def set(s, rjust = true)
 		@last_value = s
-		super(s, rjust) if @pid_lock.has_lock?
+		super(s, rjust) if self.has_display?
 	end
 end
