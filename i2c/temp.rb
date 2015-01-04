@@ -1,3 +1,4 @@
+require 'time'
 require_relative 'lib/alpha'
 
 def main
@@ -6,6 +7,7 @@ def main
 
 	display = AlphaDisplayShared.new
 	sensor = Therm1Wire.new
+	logger = DataLogger.new (Gem.win_platform? ? './' : '/home/reednj/log/temp')
 
 	loop do
 		# when the display is show, refresh the sensor every second, when its not
@@ -13,6 +15,10 @@ def main
 		if display.has_display? || i % hidden_delay == 0
 			t = sensor.read
 			puts t
+		end
+
+		if i % hidden_delay == 0
+			logger.log "#{Time.now.iso8601}\t#{t}"
 		end
 		
 		if !t.nil?
@@ -25,10 +31,25 @@ def main
 	end
 end
 
-#class DataFile
-#	def initialize(root)
-#	end
-#end
+class DataLogger
+	def initialize(dir)
+		@dir = dir.to_s
+	end
+
+	def filename
+		Time.now.strftime('%Y-%m-%d') + '.txt'
+	end
+
+	def path
+		File.join @dir, self.filename
+	end
+
+	def log(s)
+		File.open self.path, 'a' do |f|
+			f.puts s
+		end
+	end
+end
 
 class Therm1Wire
 	TEST_DATA = "a7 01 4b 46 7f ff 09 10 e0 : crc=e0 YES\na7 01 4b 46 7f ff 09 10 e0 t=26437\n"
