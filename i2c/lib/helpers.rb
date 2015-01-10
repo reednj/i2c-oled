@@ -168,7 +168,7 @@ class PIDRegistry
 	end
 
 	def reg_path
-		(Gem.win_platform?) ? './' : "/var/run/i2c/#{@device_id.to_s 16}"
+		(Gem.win_platform?) ? './data' : "/var/run/i2c/#{@device_id.to_s 16}"
 	end
 
 	def script_registered!

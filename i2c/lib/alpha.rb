@@ -228,7 +228,7 @@ class AlphaDisplayShared < AlphaDisplay
 	def initialize(device_id = DEVICE_ID)
 		super(device_id, false)
 
-		pid_path = (Gem.win_platform?) ? './' : '/var/run/i2c'
+		pid_path = (Gem.win_platform?) ? './data' : '/var/run/i2c'
 		raise "expected i2c directory doesn't exist at '#{pid_path}'" if !Dir.exists? pid_path
 		
 		# if the i2c lock file doesn't exist, then we want to init the display
