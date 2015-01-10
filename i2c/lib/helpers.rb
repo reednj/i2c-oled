@@ -242,6 +242,7 @@ class Fixnum
 		self * 7.days
 	end
 
+	alias second seconds
 	alias minute minutes
 	alias hour hours
 	alias day days

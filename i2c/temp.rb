@@ -2,32 +2,48 @@ require 'time'
 require_relative 'lib/alpha'
 
 def main
-	i = 0
-	hidden_delay = 60
-
 	display = AlphaDisplayShared.new
 	sensor = Therm1Wire.new
-	logger = DataLogger.new (Gem.win_platform? ? './' : '/home/reednj/log/temp')
+	logger = DataLogger.new (Gem.win_platform? ? './data' : '/home/reednj/log/temp')
+	timer = SingleTimer.new 1.minute, {:start_expired => true}
 
-	loop do
+	update_loop 1.second do
 		# when the display is show, refresh the sensor every second, when its not
 		# we only refresh every minute or so
-		if display.has_display? || i % hidden_delay == 0
+		if display.has_display? || timer.expired?
 			t = sensor.read
 			puts t
 		end
 
-		if i % hidden_delay == 0
+		if timer.expired?
 			logger.log "#{Time.now.iso8601}\t#{t}"
 		end
+
+		timer.reset if timer.expired?
 		
 		if !t.nil?
 			s = t.round(1).to_s + 'c'
 			display.set s
 		end
-		
-		i += 1
-		sleep 1.0
+
+	end
+end
+
+class SingleTimer
+	def initialize(delay, options)
+		@delay = delay
+		@options = options || {}
+		@start = (Time.now - 52.weeks * 100)
+
+		self.reset if @options[:start_expired] != true
+	end
+
+	def expired?
+		Time.now - @start > @delay
+	end
+
+	def reset
+		@start = Time.now
 	end
 end
 
