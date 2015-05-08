@@ -33,7 +33,7 @@ end
 class Numeric
 	def to_alpha(len = 4)
 		v = self.to_f
-		return v.round.to_s if v.round.to_s.length <= len
+		return v.to_s if v.round.to_s.length <= len
 		
 		prefixes = ['', 'k', 'M', 'G', 'T']
 		pref_index = 0
