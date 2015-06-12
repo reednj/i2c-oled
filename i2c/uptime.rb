@@ -7,12 +7,13 @@ def main()
 	update_loop 1.0 do
 		duration = (Time.now - start).to_ts
 		display.set duration
+		puts duration.to_alpha
 	end
 	
 end
 
 def system_boot
-	boot_str = Gem.win_platform? ? '         system boot  2014-12-21 07:13' : `who -b`
+	boot_str = Gem.win_platform? ? '         system boot  2015-05-21 07:13' : `who -b`
 	time_str = boot_str.split(' ')[-2..-1].join(' ')
 	return Time.parse time_str
 end

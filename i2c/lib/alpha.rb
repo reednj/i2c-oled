@@ -33,19 +33,20 @@ end
 class Numeric
 	def to_alpha(len = 4)
 		v = self.to_f
-		return v.to_s if v.round.to_s.length <= len
 		
 		prefixes = ['', 'k', 'M', 'G', 'T']
 		pref_index = 0
 
-		while v.abs > 1000
-			v = v / 1000
-			pref_index += 1
-		end
+		if v.round.to_s.length > len
+			while v.abs > 1000
+				v = v / 1000
+				pref_index += 1
+			end
 
-		if v < 0 && v.abs >= 100
-			v = v / 1000
-			pref_index += 1
+			if v < 0 && v.abs >= 100
+				v = v / 1000
+				pref_index += 1
+			end
 		end
 
 		pref = prefixes[pref_index]
