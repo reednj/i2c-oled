@@ -98,6 +98,11 @@ class PIDLock < SharedVariable
 		self.set "#{Process.pid}\n"
 	end
 
+
+	def give_lock(pid)
+		self.class.give_lock pid
+	end
+
 	def self.give_lock(pid)
 		return nil if Gem.win_platform? # do nothing on windows - doesn't support SIGUSR1
 		Process.kill 'SIGUSR1', pid.to_i

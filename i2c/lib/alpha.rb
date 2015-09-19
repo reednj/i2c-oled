@@ -239,11 +239,19 @@ class AlphaDisplayShared < AlphaDisplay
 		lock_file = File.join(pid_path, "i2c-#{device_id.to_s 16}.pid")
 		self.display_init if !File.exist? lock_file
 
+		# when we get the display, we want to record the pid of the app that had it
+		# previously - that way when this process is killed we can give it back
+		@previous_pid = nil
+
+		# last value of the display - this gets set even if the process doesn't have
+		# the display - this way when it gets it, it can set it immediately, without
+		# waiting for the process to refresh it
+		@last_value = nil
+
 		# the lock file will be created if it doesn't exist yet, and we will take the
 		# display straight away, so the user knows something is happening...
 		@pid_lock = PIDLock.new lock_file
-		@pid_lock.take_lock
-		@last_value = nil
+		take_display()
 
 		# register the script in a subdirectory of i2c so that we have a list
 		# of what wants access to the display
@@ -257,11 +265,17 @@ class AlphaDisplayShared < AlphaDisplay
 		# interferring.
 		sig = (Gem.win_platform?) ? 'INT' : 'USR1'
 		Signal.trap sig do
-			@pid_lock.take_lock
+			take_display()
 			set @last_value 
 		end
 
-		Signal.trap 'TERM' do 
+		# on terminate, dereigster the script, and give the display back to
+		# whoever had it before (if we have a record of this)
+		Signal.trap 'TERM' do
+			if has_display? && !@previous_pid.nil?
+				@pid_lock.give_lock(@previous_pid)
+			end
+
 			pid_registry.deregister_script()
 			exit
 		end
@@ -270,6 +284,12 @@ class AlphaDisplayShared < AlphaDisplay
 
 	def create_registry_dir(path)
 		Dir.mkdir path if !Dir.exist? path
+	end
+
+	def take_display
+		raise 'display lock not initialized' if @pid_lock.nil?
+		@previous_pid = @pid_lock.pid if !@pid_lock.get.nil?
+		@pid_lock.take_lock
 	end
 
 	def has_display?
