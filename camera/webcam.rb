@@ -17,6 +17,8 @@ def main()
 	`scp #{ph.output_path} #{remote}`
 	puts "uploaded to #{remote}"
 
+	display.set 'done'
+	sleep 1.0
 	display.release_display
 end
 
