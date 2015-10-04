@@ -272,10 +272,7 @@ class AlphaDisplayShared < AlphaDisplay
 		# on terminate, dereigster the script, and give the display back to
 		# whoever had it before (if we have a record of this)
 		Signal.trap 'TERM' do
-			if has_display? && !@previous_pid.nil?
-				@pid_lock.give_lock(@previous_pid)
-			end
-
+			self.release_display
 			pid_registry.deregister_script()
 			exit
 		end
@@ -284,6 +281,13 @@ class AlphaDisplayShared < AlphaDisplay
 
 	def create_registry_dir(path)
 		Dir.mkdir path if !Dir.exist? path
+	end
+
+	# releases the display back to the previous owner.
+	def release_display
+		if has_display? && !@previous_pid.nil?
+			@pid_lock.give_lock(@previous_pid)
+		end		
 	end
 
 	def take_display
