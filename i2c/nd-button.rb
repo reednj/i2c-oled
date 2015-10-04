@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 
-begin
-	require 'wiringpi2'
-rescue Exception => e
-	require_relative '../i2c/lib/wiringpi-test'
-end
+require_relative './lib/gpio'
 
 def main
 	wiringpi_pin = 3
@@ -15,32 +11,5 @@ def main
 	end
 end
 
-class GPIOInput
-	def initialize(pin, pull_type)
-		@pin = pin
-		@gpio = WiringPi::GPIO.new
-		@gpio.pin_mode @pin, WiringPi::INPUT
-		@gpio.pull_up_dn_control @pin, pull_type
-	end
-
-	def on_key_down(poll_delay=0.1)
-
-		last_value = self.read
-		loop do
-			value = self.read 
-			
-			if value != last_value
-				yield if last_value == 1 and value == 0
-			end
-			
-			last_value = value
-			sleep poll_delay
-		end
-	end
-
-	def read
-		@gpio.digital_read @pin
-	end
-end
 
 main()
