@@ -38,7 +38,7 @@ class App
 	end
 
 	def tweet(output_path)
-		twitter_account = 'hacker_news_txt'
+		twitter_account = 'pi_fotobot'
 		text = Time.now.strftime("%A, %H:%M")
 
 		server = SSHCmd.new('reednj@paint.reednj.com')
