@@ -39,7 +39,8 @@ class App
 
 	def tweet(output_path)
 		twitter_account = 'pi_fotobot'
-		text = Time.now.strftime("%A, %H:%M")
+		tweet_time = Time.now.strftime("%A, %H:%M")
+		text = "#{tweet_time} #raspberrypi"
 
 		server = SSHCmd.new('reednj@paint.reednj.com')
 		server.scp(output_path, remote_path)
