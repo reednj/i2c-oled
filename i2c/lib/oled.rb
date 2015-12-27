@@ -3,6 +3,7 @@ require './lib/font-adafruit'
 
 module DisplayGFX
 	attr_accessor :fill_color
+	attr_accessor :font
 
 	def self.included(base)
 
@@ -14,6 +15,20 @@ module DisplayGFX
 				self.set_pixel(xx, yy, fill_color)
 			end
 		end
+	end
+
+	def fill_text(x, y, text)
+		raise 'no font selected' if self.font.nil?
+
+		text.to_s.split('').each_with_index do |c, i|
+			self.fill_char(x + i * (self.font.width + 1), y, c)
+		end
+	end
+
+	def fill_char(x, y, c)
+		raise 'no font selected' if self.font.nil?
+		bitmap = self.font.char_bitmap c.ord
+		self.draw_bitmap(x, y, self.font.width, self.font.height, bitmap)
 	end
 
 	def draw_bitmap(x, y, w, h, data)

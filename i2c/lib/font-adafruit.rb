@@ -13,13 +13,13 @@ class ClassicFont
 	end
 
 	def self.height
-		return 7
+		return 8
 	end
 
 	def self.char_bitmap(c)
 		if c.is_a? String
 			index = c.ord
-		elsif c.is_a Numeric
+		elsif c.is_a? Numeric
 			index = c.to_i
 		else
 			raise 'character or number required'
@@ -35,7 +35,7 @@ class ClassicFont
 		# mapping here
 		bitmap = []
 
-		(0..7).each do |y|
+		(0..height).each do |y|
 			raw.each do |byte|
 				bit = (byte >> y) & 0x01
 				bitmap.push bit == 1 ? 1 : 0
