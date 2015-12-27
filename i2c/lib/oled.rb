@@ -1,4 +1,5 @@
 require './lib/i2c'
+require './lib/font-adafruit'
 
 module DisplayGFX
 	attr_accessor :fill_color
@@ -8,10 +9,20 @@ module DisplayGFX
 	end
 
 	def fill_rect(x, y, w, h)
-
 		(x...(x + w)).each do |xx|
 			(y...(y + h)).each do |yy|
 				self.set_pixel(xx, yy, fill_color)
+			end
+		end
+	end
+
+	def draw_bitmap(x, y, w, h, data)
+		raise "not enough data for a #{w}x#{h} bitmap" if data.length < w*h
+
+		(0...w).each do |xx|
+			(0...h).each do |yy|
+				bit = data[xx + yy*w]
+				set_pixel(x + xx, y + yy, self.fill_color) if bit > 0
 			end
 		end
 	end
