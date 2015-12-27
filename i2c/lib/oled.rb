@@ -5,9 +5,20 @@ module DisplayGFX
 	attr_accessor :fill_color
 	attr_accessor :font
 	attr_accessor :font_size
+	attr_accessor :line_width
 
 	def self.included(base)
 
+	end
+	
+	def stroke_rect(x, y, w, h)
+		#self.line_width ||= 1
+
+		#(x...(x + w)).each do |xx|
+		#	(y...y + line_width).each do |yy|
+		#		self.set_pixel(xx, yy, fill_color)
+		#	end
+		#end
 	end
 
 	def fill_rect(x, y, w, h)
@@ -43,6 +54,13 @@ module DisplayGFX
 				set_pixel(x + xx, y + yy, self.fill_color) if bit > 0
 			end
 		end
+	end
+
+	def measure_text(text)
+		return {
+			:width => (self.font.width + 1) * self.font_size * text.to_s.length,
+			:height => self.font.height * self.font_size
+		}
 	end
 
 end
