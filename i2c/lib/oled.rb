@@ -227,7 +227,6 @@ class OLEDDisplay
 			(0...buffer_width).step(@packet_size_bytes).each do |x|
 				packet = @buffer[y][x...(x + @packet_size_bytes)]
 				self.write_data packet
-				sleep(0.30)
 			end			
 		end
 
@@ -253,10 +252,29 @@ class OLEDDisplay
 	end
 
 	def set_pixel(x, y, color)
-		raise 'NotImplemented'
+		raise "invalid color #{color}" if color != COLOR_WHITE && color != COLOR_BLACK
+		raise "invalid coordinates (#{x}, #{y})" if x < 0 || x >= @width || y < 0 || y >= @height
+
+		# we get the x and y for the buffer...
+		buffer_x = x
+		buffer_y = (y.to_f / 8.0).floor
+
+		# ...plus the bit number we have to set within it
+		buffer_bit = y % 8
+
+		# @buffer[x][y] represents a single byte of the buffer, which
+		# in turn represents a vertical column of 8 pixels on the display
+		if color != COLOR_BLACK
+			@buffer[buffer_y][buffer_x] |= (color << buffer_bit)
+		else
+			@buffer[buffer_y][buffer_x] ^= (1 << buffer_bit)
+		end
 	end
 
 end
 
-
-OLEDDisplay.new.write_buffer
+d = OLEDDisplay.new
+d.set_pixel(10, 10, OLEDDisplay::COLOR_WHITE)
+d.set_pixel(10, 11, OLEDDisplay::COLOR_WHITE)
+d.set_pixel(10, 10, OLEDDisplay::COLOR_BLACK)
+d.write_buffer
