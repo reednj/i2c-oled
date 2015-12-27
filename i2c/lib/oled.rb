@@ -54,7 +54,11 @@ class OLEDDisplay
 	SSD1306_SETLOWCOLUMN = 0x00
 	SSD1306_SETHIGHCOLUMN = 0x10
 	SSD1306_SETSTARTLINE = 0x40
+	
 	SSD1306_MEMORYMODE = 0x20
+	SSD1306_COLUMNADDRESS = 0x21
+	SSD1306_PAGEADDRESS = 0x22
+
 	SSD1306_COMSCANINC = 0xC0
 	SSD1306_COMSCANDEC = 0xC8
 	SSD1306_SEGREMAP = 0xA0
@@ -121,9 +125,10 @@ class OLEDDisplay
 
 		# Reset to default value in case of 
 		# no reset pin available on OLED
-		write_command [0x21, 0, 127]
-		write_command [0x22, 0,   7]
-		
+		write_command [SSD1306_COLUMNADDRESS, 0, 127]
+		write_command [SSD1306_PAGEADDRESS, 0, 7]
+		write_command SSD_Deactivate_Scroll
+
 		# Empty uninitialized buffer
 		write_command SSD_Display_On 
 	end
@@ -139,16 +144,18 @@ class OLEDDisplay
 	end
 
 	def write_buffer
+
 		# set the write 'cursor' at (0,0) so we want refresh the whole display
-		write_command(SSD1306_SETLOWCOLUMN  | 0x0); # low col = 0
-		write_command(SSD1306_SETHIGHCOLUMN | 0x0); # hi col = 0
-		write_command(SSD1306_SETSTARTLINE  | 0x0); # line num. 0
+		write_command(SSD1306_SETLOWCOLUMN  | 0x00) # low col = 0
+		write_command(SSD1306_SETHIGHCOLUMN | 0x00) # hi col = 0
+		write_command(SSD1306_SETSTARTLINE  | 0x00) # line num. 0
+		write_command [SSD1306_PAGEADDRESS, 0, 7]
 
 		(0...buffer_height).each do |y|
 			(0...buffer_width).step(@packet_size_bytes).each do |x|
 				packet = @buffer[y][x...(x + @packet_size_bytes)]
 				self.write_data packet
-			end			
+			end
 		end
 
 	end
