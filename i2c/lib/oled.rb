@@ -81,7 +81,7 @@ class OLEDDisplay
 		initialize_display
 		
 		@buffer = nil
-		@packet_size_bytes = 16
+		@packet_size_bytes = 32
 		clear_buffer
 	end
 
@@ -146,14 +146,15 @@ class OLEDDisplay
 	def write_buffer
 
 		# set the write 'cursor' at (0,0) so we want refresh the whole display
-		write_command(SSD1306_SETLOWCOLUMN  | 0x00) # low col = 0
-		write_command(SSD1306_SETHIGHCOLUMN | 0x00) # hi col = 0
-		write_command(SSD1306_SETSTARTLINE  | 0x00) # line num. 0
+		write_command(SSD1306_SETLOWCOLUMN  | 0x0) # low col = 0
+		write_command(SSD1306_SETHIGHCOLUMN | 0x0) # hi col = 0
+		write_command(SSD1306_SETSTARTLINE  | 0x0) # line num. 0
 		write_command [SSD1306_PAGEADDRESS, 0, 7]
 
 		(0...buffer_height).each do |y|
 			(0...buffer_width).step(@packet_size_bytes).each do |x|
-				packet = @buffer[y][x...(x + @packet_size_bytes)]
+				packet_end = [x + @packet_size_bytes, buffer_width].min
+				packet = @buffer[y][x...packet_end]
 				self.write_data packet
 			end
 		end
