@@ -191,6 +191,14 @@ class OLEDDisplay
 		end
 	end
 
+	def display_off
+		write_command SSD_Display_Off
+	end
+
+	def display_on
+		write_command SSD_Display_On
+	end
+
 	def height
 		@height
 	end
