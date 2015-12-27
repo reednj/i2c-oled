@@ -24,10 +24,35 @@ if MOCK_DEVICE
 	end
 else
 
+	# if the library is not found at the path provided, try building it
+	def build_extern(lib_path)
+		# the library already exists, don't need to do anything
+		return if File.exist? lib_path
+
+		dir = File.dirname(lib_path)
+		makefile = File.join dir, 'Makefile'
+		build_sh = File.join dir, 'build.sh'
+
+		if File.exist? makefile
+			`cd #{dir}; make > /dev/null`
+		elsif File.exist? build_sh
+			`cd #{dir}; ./build.sh > /dev/null`
+		else
+			raise "Could not find any way to build #{lib_path}"
+		end
+
+		# check that the lib exists now, if it doesn't, throw an exception as the build
+		# must have failed
+		raise "#{lib_path} could not be built" if !File.exist? lib_path
+		return
+	end
+
+	build_extern 'extern/bcm2835.so'
+
 	module BCM2835_I2C
 		extend FFI::Library
 		ffi_lib 'c'
-		ffi_lib './bcm2835.so'
+		ffi_lib './extern/bcm2835.so'
 		attach_function :bcm2835_i2c_begin,[], :int
 		attach_function :bcm2835_i2c_write, [:pointer, :int], :int
 		attach_function :bcm2835_i2c_end, [], :void
