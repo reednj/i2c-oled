@@ -1,4 +1,4 @@
-require './i2c'
+require './lib/i2c'
 
 class OLEDDisplay
 
@@ -153,14 +153,6 @@ class OLEDDisplay
 
 	end
 
-	def buffer_height
-		@height / 8
-	end
-
-	def buffer_width
-		@width
-	end
-
 	def clear_buffer
 		@buffer = []
 
@@ -192,10 +184,21 @@ class OLEDDisplay
 		end
 	end
 
-end
+	def height
+		@height
+	end
 
-d = OLEDDisplay.new
-#d.set_pixel(10, 10, OLEDDisplay::COLOR_WHITE)
-#d.set_pixel(10, 11, OLEDDisplay::COLOR_WHITE)
-#d.set_pixel(10, 10, OLEDDisplay::COLOR_BLACK)
-d.write_buffer
+	def width
+		@width
+	end
+
+	def buffer_height
+		@height / 8
+	end
+
+	def buffer_width
+		@width
+	end
+
+
+end

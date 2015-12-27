@@ -68,9 +68,9 @@ else
 		ffi_lib 'c'
 		
 		# build the bcm lib (if needed), then add it to ffi
-		lib_name =  './extern/bcm2835.so'
-		build_extern lib_name
-		ffi_lib lib_name
+		lib_path = File.join File.dirname(__FILE__), 'extern/bcm2835.so'
+		build_extern lib_path
+		ffi_lib lib_path
 
 		# attach the i2c methods. There are many more in the lib, but these
 		# are the only ones we actually need
