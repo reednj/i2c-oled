@@ -8,10 +8,11 @@ class App
 
 		display.fill_color = OLEDDisplay::COLOR_WHITE
 		display.font = ClassicFont
+		display.font_size = 2
 		
 		update_loop 0.2 do
 			t = Time.now.strftime '%H:%M:%S'
-			display.fill_text 40, 12, t
+			display.fill_text 20, 12, t
 			display.write_buffer
 			display.clear_buffer
 		end
