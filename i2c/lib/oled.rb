@@ -1,108 +1,4 @@
-require 'ffi'
-
-MOCK_DEVICE = Gem.win_platform?
-
-if MOCK_DEVICE
-	module BCM2835_I2C
-		
-		def self.bcm2835_i2c_write(data, len)
-			puts data.unpack('C*').map { |d| d.to_s(16) }.join(' ')
-			return 0
-		end
-
-		def self.bcm2835_i2c_begin
-			return 0
-		end
-
-		def self.bcm2835_i2c_end
-			return nil
-		end
-
-		def self.bcm2835_i2c_setSlaveAddress(device_id)
-			return 0
-		end
-	end
-else
-
-	# if the library is not found at the path provided, try building it
-	def build_extern(lib_path)
-		# the library already exists, don't need to do anything
-		return if File.exist? lib_path
-
-		dir = File.dirname(lib_path)
-		makefile = File.join dir, 'Makefile'
-		build_sh = File.join dir, 'build.sh'
-
-		if File.exist? makefile
-			`cd #{dir}; make > /dev/null`
-		elsif File.exist? build_sh
-			`cd #{dir}; ./build.sh > /dev/null`
-		else
-			raise "Could not find any way to build #{lib_path}"
-		end
-
-		# check that the lib exists now, if it doesn't, throw an exception as the build
-		# must have failed
-		raise "#{lib_path} could not be built" if !File.exist? lib_path
-		return
-	end
-
-	build_extern 'extern/bcm2835.so'
-
-	module BCM2835_I2C
-		extend FFI::Library
-		ffi_lib 'c'
-		ffi_lib './extern/bcm2835.so'
-		attach_function :bcm2835_i2c_begin,[], :int
-		attach_function :bcm2835_i2c_write, [:pointer, :int], :int
-		attach_function :bcm2835_i2c_end, [], :void
-		attach_function :bcm2835_i2c_setSlaveAddress, [:uint8], :int
-	end
-
-end
-
-class I2CDevice
-	def initialize(device_id)
-		@device_id = device_id.to_i
-		
-		_begin
-		_set_slave @device_id
-	end
-
-	def device_id
-		@device_id
-	end
-
-	def write(byte_arr)
-		raise 'array required' if !byte_arr.is_a? Array
-
-		data = byte_arr.pack 'C*'
-		_write data, data.length
-	end
-
-	def close
-		BCM2835_I2C.bcm2835_i2c_end
-	end
-
-	def _begin
-		result = BCM2835_I2C.bcm2835_i2c_begin
-		raise "i2c_begin failed with code (#{result})" if result < 0
-		return result
-	end
-
-	def _set_slave(device_id)
-		result = BCM2835_I2C.bcm2835_i2c_setSlaveAddress device_id
-		raise "i2c_set_slave failed with code (#{result})" if result < 0
-		return result
-	end
-
-	def _write(data, len)
-		result = BCM2835_I2C.bcm2835_i2c_write data, len
-		raise "i2c_write failed with code (#{result})" if result < 0
-		return result
-	end
-
-end
+require './i2c'
 
 class OLEDDisplay
 
@@ -299,7 +195,7 @@ class OLEDDisplay
 end
 
 d = OLEDDisplay.new
-d.set_pixel(10, 10, OLEDDisplay::COLOR_WHITE)
-d.set_pixel(10, 11, OLEDDisplay::COLOR_WHITE)
-d.set_pixel(10, 10, OLEDDisplay::COLOR_BLACK)
+#d.set_pixel(10, 10, OLEDDisplay::COLOR_WHITE)
+#d.set_pixel(10, 11, OLEDDisplay::COLOR_WHITE)
+#d.set_pixel(10, 10, OLEDDisplay::COLOR_BLACK)
 d.write_buffer
