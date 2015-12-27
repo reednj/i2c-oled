@@ -11,8 +11,8 @@ class Bitmap
 	attr_accessor :height
 
 	def initialize(width, height)
-		self.width = width.to_i
-		self.height = height.to_i
+		self.width = width.round.to_i
+		self.height = height.round.to_i
 		@data = (0...(self.width * self.height)).map { |i| 0 }
 	end
 
@@ -21,7 +21,7 @@ class Bitmap
 	end
 
 	def get(x, y)
-		@data[x + y * width]
+		@data[x + y * width] || 0
 	end
 
 	def set(x, y, bit)
@@ -36,7 +36,7 @@ class Bitmap
 				x = (xx / s).floor
 				y = (yy / s).floor
 
-				bitmap.set xx, yy, self.get(x, y)  	
+				bitmap.set xx, yy, self.get(x, y)
 			end
 		end
 
