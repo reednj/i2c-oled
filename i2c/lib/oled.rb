@@ -1,6 +1,24 @@
 require './lib/i2c'
 
+module DisplayGFX
+	attr_accessor :fill_color
+
+	def self.included(base)
+
+	end
+
+	def fill_rect(x, y, w, h)
+
+		(x...(x + w)).each do |xx|
+			(y...(y + h)).each do |yy|
+				self.set_pixel(xx, yy, fill_color)
+			end
+		end
+	end
+end
+
 class OLEDDisplay
+	include DisplayGFX
 
 	# generic SSD consts
 
@@ -174,7 +192,7 @@ class OLEDDisplay
 
 	def set_pixel(x, y, color)
 		raise "invalid color #{color}" if color != COLOR_WHITE && color != COLOR_BLACK
-		raise "invalid coordinates (#{x}, #{y})" if x < 0 || x >= @width || y < 0 || y >= @height
+		return false if x < 0 || x >= @width || y < 0 || y >= @height
 
 		# we get the x and y for the buffer...
 		buffer_x = x
@@ -190,6 +208,8 @@ class OLEDDisplay
 		else
 			@buffer[buffer_y][buffer_x] ^= (1 << buffer_bit)
 		end
+
+		return true
 	end
 
 	def display_off
