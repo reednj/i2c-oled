@@ -1,13 +1,39 @@
 require 'ffi'
 
-module BCM2835_I2C
-	extend FFI::Library
-	ffi_lib 'c'
-	ffi_lib './bcm2835.so'
-	attach_function :bcm2835_i2c_begin,[], :int
-	attach_function :bcm2835_i2c_write, [:pointer, :int], :int
-	attach_function :bcm2835_i2c_end, [], :void
-	attach_function :bcm2835_i2c_setSlaveAddress, [:uint8], :int
+MOCK_DEVICE = Gem.win_platform?
+
+if MOCK_DEVICE
+	module BCM2835_I2C
+		
+		def self.bcm2835_i2c_write(data, len)
+			puts data.unpack('C*').map { |d| d.to_s(16) }.join(' ')
+			return 0
+		end
+
+		def self.bcm2835_i2c_begin
+			return 0
+		end
+
+		def self.bcm2835_i2c_end
+			return nil
+		end
+
+		def self.bcm2835_i2c_setSlaveAddress(device_id)
+			return 0
+		end
+	end
+else
+
+	module BCM2835_I2C
+		extend FFI::Library
+		ffi_lib 'c'
+		ffi_lib './bcm2835.so'
+		attach_function :bcm2835_i2c_begin,[], :int
+		attach_function :bcm2835_i2c_write, [:pointer, :int], :int
+		attach_function :bcm2835_i2c_end, [], :void
+		attach_function :bcm2835_i2c_setSlaveAddress, [:uint8], :int
+	end
+
 end
 
 class I2CDevice
@@ -119,12 +145,19 @@ class OLEDDisplay
 	SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL = 0x29
 	SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL = 0x2A
 
+	COLOR_BLACK = 0
+	COLOR_WHITE = 1
+
 	def initialize(device_id = 0x3c)
 		@width = 128
 		@height = 32
 		@device = I2CDevice.new device_id
 
 		initialize_display
+		
+		@buffer = nil
+		@packet_size_bytes = 16
+		clear_buffer
 	end
 
 	def initialize_display
@@ -171,7 +204,6 @@ class OLEDDisplay
 		write_command [0x22, 0,   7]
 		
 		# Empty uninitialized buffer
-		#clearDisplay();
 		write_command SSD_Display_On 
 	end
 
@@ -185,32 +217,39 @@ class OLEDDisplay
 		@device.write bytes
 	end
 
-	def display_buffer
+	def write_buffer
+		# set the write 'cursor' at (0,0) so we want refresh the whole display
 		write_command(SSD1306_SETLOWCOLUMN  | 0x0); # low col = 0
 		write_command(SSD1306_SETHIGHCOLUMN | 0x0); # hi col = 0
 		write_command(SSD1306_SETSTARTLINE  | 0x0); # line num. 0
 
-		data = [0x00, 0x00, 0xfc, 0xfc,
-			0xfc, 0xfc, 0xfc, 0xfc,
-			0xfc, 0xfc, 0xfc, 0xfc,
-			0xfc, 0xfc, 0xfc, 0xfc
-		]
-
-		(0...@height).each do |line|
-			(0...16).each do |i|
-				data[i] = 0x00 #(rand * 255).floor
-			end
-
-			data[0] = 0xff
-			data[2] = 0x1
-
-			write_data data
-			sleep(0.30)
+		(0...buffer_height).each do |y|
+			(0...buffer_width).step(@packet_size_bytes).each do |x|
+				packet = @buffer[y][x...(x + @packet_size_bytes)]
+				self.write_data packet
+				sleep(0.30)
+			end			
 		end
+
 	end
 
-	def clear_display
+	def buffer_height
+		@height / 8
+	end
 
+	def buffer_width
+		@width
+	end
+
+	def clear_buffer
+		@buffer = []
+
+		(0...buffer_height).each do |y|
+			row = (0...buffer_width).map { |x| 0x00 }
+			@buffer.push row
+		end
+
+		return @buffer
 	end
 
 	def set_pixel(x, y, color)
@@ -220,4 +259,4 @@ class OLEDDisplay
 end
 
 
-OLEDDisplay.new.display_buffer
+OLEDDisplay.new.write_buffer
