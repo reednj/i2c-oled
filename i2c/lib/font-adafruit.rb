@@ -6,6 +6,44 @@
 
 # Standard ASCII 5x7 font
 
+class Bitmap
+	attr_accessor :width
+	attr_accessor :height
+
+	def initialize(width, height)
+		self.width = width.to_i
+		self.height = height.to_i
+		@data = (0...(self.width * self.height)).map { |i| 0 }
+	end
+
+	def data
+		@data
+	end
+
+	def get(x, y)
+		@data[x + y * width]
+	end
+
+	def set(x, y, bit)
+		@data[x + y * width] = bit
+	end
+
+	def scale(s)
+		bitmap = Bitmap.new(self.width * s, self.height * s)
+
+		(0...bitmap.width).each do |xx|
+			(0...bitmap.height).each do |yy|
+				x = (xx / s).floor
+				y = (yy / s).floor
+
+				bitmap.set xx, yy, self.get(x, y)  	
+			end
+		end
+
+		return bitmap
+	end
+end
+
 class ClassicFont
 
 	def self.width
@@ -33,12 +71,12 @@ class ClassicFont
 		# a flat array of integers that are either zero or one that can
 		# directly be looped through and passed to set_pixel, so we do that
 		# mapping here
-		bitmap = []
+		bitmap = Bitmap.new(width, height)
 
 		(0..height).each do |y|
-			raw.each do |byte|
+			raw.each_with_index do |byte, x|
 				bit = (byte >> y) & 0x01
-				bitmap.push bit == 1 ? 1 : 0
+				bitmap.set(x, y, bit)
 			end
 		end
 		

@@ -30,37 +30,21 @@ module DisplayGFX
 	def fill_char(x, y, c)
 		raise 'no font selected' if self.font.nil?
 		bitmap = self.font.char_bitmap c.ord
-		bitmap = self.scale_bitmap self.font.width, self.font.height, self.font_size, bitmap
-		self.draw_bitmap(x, y, self.font.width*self.font_size, self.font.height*self.font_size, bitmap)
+		bitmap = bitmap.scale self.font_size
+		self.draw_bitmap(x, y, bitmap)
 	end
 
-	def draw_bitmap(x, y, w, h, data)
-		raise "not enough data for a #{w}x#{h} bitmap" if data.length < w*h
+	def draw_bitmap(x, y, bitmap)
+		raise 'needs bitmap needs to be of type Bitmap' if !bitmap.is_a? Bitmap
 
-		(0...w).each do |xx|
-			(0...h).each do |yy|
-				bit = data[xx + yy*w]
+		(0...bitmap.width).each do |xx|
+			(0...bitmap.height).each do |yy|
+				bit = bitmap.get xx, yy
 				set_pixel(x + xx, y + yy, self.fill_color) if bit > 0
 			end
 		end
 	end
 
-	def scale_bitmap(w, h, scale, data)
-		scale = scale.to_i
-		bitmap = []
-
-		(0...w*scale).each do |xx|
-			(0...h*scale).each do |yy|
-				x = (xx / scale).floor
-				y = (yy / scale).floor
-
-				bit = data[x + y * w]
-				bitmap[xx + yy * w * scale] = data[x + y * w]	
-			end
-		end
-
-		return bitmap
-	end
 end
 
 class OLEDDisplay
