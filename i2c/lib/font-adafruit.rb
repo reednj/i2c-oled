@@ -14,6 +14,7 @@ class Bitmap
 		self.width = width.round.to_i
 		self.height = height.round.to_i
 		@data = (0...(self.width * self.height)).map { |i| 0 }
+		@scaled_cache = {}
 	end
 
 	def data
@@ -29,6 +30,9 @@ class Bitmap
 	end
 
 	def scale(s)
+		return self if s == 1.0
+		return @scaled_cache[scale_key(s)] if !@scaled_cache[scale_key(s)].nil?
+
 		bitmap = Bitmap.new(self.width * s, self.height * s)
 
 		(0...bitmap.width).each do |xx|
@@ -40,7 +44,15 @@ class Bitmap
 			end
 		end
 
+		# turns out that scaling the bitmap takes quite a bit of time when
+		# rendering text, so we keep a cache of the scaled bitmaps that 
+		# can be returned immediately
+		@scaled_cache[scale_key(s)] = bitmap
 		return bitmap
+	end
+
+	def scale_key(s)
+		"x#{s.to_f.round(2).to_s}"
 	end
 end
 
@@ -63,6 +75,8 @@ class ClassicFont
 			raise 'character or number required'
 		end
 
+		return @cached_bitmaps[index] if !@cached_bitmaps[index].nil?
+
 		# the font data is encoded with 5 bytes for each character
 		# each byte represents a column of 8 bits. 
 		raw = @data[(index * width)...((index + 1) * width)]
@@ -79,9 +93,13 @@ class ClassicFont
 				bitmap.set(x, y, bit)
 			end
 		end
-		
+
+		@cached_bitmaps[index] = bitmap
+
 		return bitmap
 	end
+
+	@cached_bitmaps = []
 
 	@data = [
 		0x00, 0x00, 0x00, 0x00, 0x00,

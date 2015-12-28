@@ -6,9 +6,13 @@ def main
 
 	puts "benchmarking oled fps"
 
+	display.font = ClassicFont
+	display.font_size = 2
+	display.fill_color =  OLEDDisplay::COLOR_WHITE
+
 	result = benchmark do
-		10.times { random_pixel(display) }
-		display.write_buffer
+		display.fill_text 10, 10, '987 this is a test 0123'
+		display.clear_buffer
 	end
 
 	puts "#{result.round(1)} fps"
