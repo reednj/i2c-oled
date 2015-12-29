@@ -266,6 +266,19 @@ class OLEDDisplay
 		return @buffer
 	end
 
+	# a render loop for the display - yields to do whatever rendering is needed
+	# then writes and clears the buffer and sleeps for the specified delay
+	#
+	# would it be better the specify an fps instead of a delay?
+	def update_loop(delay)
+		loop do
+			yield
+			write_buffer
+			clear_buffer
+			sleep delay
+		end
+	end
+
 	def set_pixel(x, y, color)
 		raise "invalid color #{color}" if color != COLOR_WHITE && color != COLOR_BLACK
 		return false if x < 0 || x >= @width || y < 0 || y >= @height
