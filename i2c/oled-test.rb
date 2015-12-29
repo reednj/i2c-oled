@@ -6,7 +6,6 @@ def main
 
 	puts "benchmarking oled fps"
 
-	display.font = ClassicFont
 	display.font_size = 2
 	display.fill_color =  OLEDDisplay::COLOR_WHITE
 

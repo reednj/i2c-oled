@@ -7,19 +7,16 @@ module DisplayGFX
 	attr_accessor :font_size
 	attr_accessor :line_width
 
-	def self.included(base)
-
+	def initialize(*args)
+		self.fill_color = 0
+		self.font = ClassicFont
+		self.font_size = 1
+		self.line_width = 1
 	end
 	
-	def stroke_rect(x, y, w, h)
-		#self.line_width ||= 1
-
-		#(x...(x + w)).each do |xx|
-		#	(y...y + line_width).each do |yy|
-		#		self.set_pixel(xx, yy, fill_color)
-		#	end
-		#end
-	end
+	#def font=(f)
+	#	#@font = font
+	#end
 
 	def fill_rect(x, y, w, h)
 		(x...(x + w)).each do |xx|
@@ -140,6 +137,8 @@ class OLEDDisplay
 	COLOR_WHITE = 1
 
 	def initialize(device_id = 0x3c)
+		super
+
 		@width = 128
 		@height = 32
 		@device = I2CDevice.new device_id
@@ -244,7 +243,7 @@ class OLEDDisplay
 
 		# we get the x and y for the buffer...
 		buffer_x = x
-		buffer_y = (y.to_f / 8.0).floor
+		buffer_y = (y / 8).floor
 
 		# ...plus the bit number we have to set within it
 		buffer_bit = y % 8
