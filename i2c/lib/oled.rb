@@ -5,6 +5,7 @@ module DisplayGFX
 	attr_accessor :fill_color
 	attr_accessor :font_size
 	attr_accessor :line_width
+	attr_accessor :text_align
 
 	attr_reader :font
 
@@ -20,6 +21,7 @@ module DisplayGFX
 		self.font = ClassicFont
 		self.font_size = 1
 		self.line_width = 1
+		self.text_align = :center
 	end
 	
 	def fill_rect(x, y, w, h)
@@ -32,6 +34,22 @@ module DisplayGFX
 
 	def fill_text(x, y, text)
 		raise 'no font selected' if self.font.nil?
+
+		# by default (x,y) will be the top right corner of the 
+		# text, but it is useful to have it be the middle or the
+		# top right
+		#
+		# these adjust the coords back to the top left position
+		# based off what the text align was set to
+		if self.text_align != :left
+			text_size = self.measure_text text
+
+			if self.text_align == :center
+				x = x - text_size[:width] / 2
+			elsif self.text_align == :right
+				x = x - text_size[:width]
+			end
+		end
 
 		text.to_s.split('').each_with_index do |c, i|
 			offset = i * (self.font.width + 1) * self.font_size
@@ -61,6 +79,13 @@ module DisplayGFX
 		return {
 			:width => (self.font.width + 1) * self.font_size * text.to_s.length,
 			:height => self.font.height * self.font_size
+		}
+	end
+
+	def display_center
+		return {
+			:x => (self.width / 2).floor,
+			:y => (self.height / 2).floor
 		}
 	end
 
