@@ -3,9 +3,17 @@ require './lib/font-adafruit'
 
 module DisplayGFX
 	attr_accessor :fill_color
-	attr_accessor :font
 	attr_accessor :font_size
 	attr_accessor :line_width
+
+	attr_reader :font
+
+	# check the type when setting the font - we need a char_bitmap method to convert it
+	# to something that can be rendered
+	def font=(f)
+		raise 'Font must respond to char_bitmap' if !f.nil? && !f.respond_to?(:char_bitmap)
+		@font = f
+	end
 
 	def initialize(*args)
 		self.fill_color = 0
@@ -14,10 +22,6 @@ module DisplayGFX
 		self.line_width = 1
 	end
 	
-	#def font=(f)
-	#	#@font = font
-	#end
-
 	def fill_rect(x, y, w, h)
 		(x...(x + w)).each do |xx|
 			(y...(y + h)).each do |yy|
