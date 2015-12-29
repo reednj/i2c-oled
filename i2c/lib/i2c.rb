@@ -37,21 +37,12 @@ end
 
 if !i2c_exists?
 
-	class String
-		def pad(len=2)
-			return self if self.length >= len
-			return '0' + self
-		end
-	end
-
 	# I2C doesn't exist on this device, so we want to create a mock object
 	# it will always be successful, and will print any data written to the 
 	# device to stdout as hex
 	module BCM2835_I2C
 		
 		def self.bcm2835_i2c_write(data, len)
-			puts data.unpack('C*').map { |d| d.to_s(16).pad }.join(' ')
-			STDOUT.flush
 			return 0
 		end
 
@@ -96,7 +87,10 @@ end
 # device. Inherit this class to implement more specific methods for each
 # I2C device
 class I2CDevice
-	def initialize(device_id)
+	def initialize(device_id, options = {})
+		@options = options || {}
+		@options[:debug] ||= false
+
 		@device_id = device_id.to_i
 		
 		_begin
@@ -112,10 +106,16 @@ class I2CDevice
 
 		data = byte_arr.pack 'C*'
 		_write data, data.length
+		write_debug data if @options[:debug]
 	end
 
 	def close
 		BCM2835_I2C.bcm2835_i2c_end
+	end
+
+	def write_debug(data)
+		puts data.unpack('C*').map { |d| d.to_s(16).pad }.join(' ')
+		STDOUT.flush
 	end
 
 	private
@@ -138,4 +138,11 @@ class I2CDevice
 		return result
 	end
 
+end
+
+class String
+	def pad(len=2)
+		return self if self.length >= len
+		return '0' + self
+	end
 end
