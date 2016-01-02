@@ -6,7 +6,7 @@
 
 
 
-require './lib/font-base.rb'
+require './lib/gfx/font-base.rb'
 
 
 # Standard ASCII 5x7 font
