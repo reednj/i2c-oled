@@ -51,14 +51,22 @@ module DisplayGFX
 			end
 		end
 
+		x_offset = 0
 		text.to_s.split('').each_with_index do |c, i|
-			offset = i * (self.font.width + 1) * self.font_size
-			self.fill_char(x + offset, y, c)
+			self.fill_char(x + x_offset, y, c)
+			x_offset += self.font.glyph(c).x_advance * self.font_size
 		end
 	end
 
 	def fill_char(x, y, c)
 		raise 'no font selected' if self.font.nil?
+		
+		# for the true-type fonts we need to use the y-offset to make sure
+		# that the baseline is aligned properly
+		glyph = self.font.glyph c
+		y += glyph.y_offset * self.font_size
+		x += glyph.x_offset * self.font_size
+
 		bitmap = self.font.char_bitmap c.ord
 		bitmap = bitmap.scale self.font_size
 		self.draw_bitmap(x, y, bitmap)
@@ -76,8 +84,10 @@ module DisplayGFX
 	end
 
 	def measure_text(text)
+		text_width = text.split('').map{|c| self.font.glyph(c).x_advance }.reduce(0, :+)
+
 		return {
-			:width => (self.font.width + 1) * self.font_size * text.to_s.length,
+			:width => text_width * self.font_size,
 			:height => self.font.height * self.font_size
 		}
 	end

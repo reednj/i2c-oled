@@ -2,19 +2,17 @@ require './lib/helpers'
 require './lib/oled'
 
 def main
+
 	display = OLEDDisplay.new
 
-	puts "benchmarking oled fps"
+	display.fill_color = OLEDDisplay::COLOR_WHITE
+	display.font = ClassicFont
+	display.text_align = :left
 
-	display.font_size = 2
-	display.fill_color =  OLEDDisplay::COLOR_WHITE
+	display.fill_text 1, 30, Time.now.strftime('%H:%M:%S')
 
-	result = benchmark do
-		display.fill_text 10, 10, '987 this is a test 0123'
-		display.clear_buffer
-	end
-
-	puts "#{result.round(1)} fps"
+	display.write_buffer
+	display.clear_buffer
 
 end
 
