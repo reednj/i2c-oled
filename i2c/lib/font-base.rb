@@ -15,6 +15,10 @@ class BitmapFont
 		return @height 
 	end
 
+	def self.line_height
+		self.height + 1
+	end
+
 	def self.glyph(c)
 		TrueTypeGlyph.new [
 			nil,		# bitmap offset
@@ -62,7 +66,11 @@ class TrueTypeFont
 	@last_char = nil
 	@y_advance = nil
 
-	def height
+	def self.height
+		self.glyph('M').height
+	end
+
+	def self.line_height
 		@y_advance
 	end
 

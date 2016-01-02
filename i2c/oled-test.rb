@@ -6,10 +6,11 @@ def main
 	display = OLEDDisplay.new
 
 	display.fill_color = OLEDDisplay::COLOR_WHITE
-	display.font = ClassicFont
+	display.font = FreeSans12pt7b
 	display.text_align = :left
 
-	display.fill_text 1, 30, Time.now.strftime('%H:%M:%S')
+	y = display.font.height / 2 + display.font.height / 2 
+	display.fill_text 1, y, 'hello, world' #Time.now.strftime('%H:%M:%S')
 
 	display.write_buffer
 	display.clear_buffer
