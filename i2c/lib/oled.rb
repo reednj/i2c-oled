@@ -3,7 +3,8 @@ require './lib/gfx/gfx'
 
 class OLEDDisplay
 	include DisplayGFX
-
+	include DisplayTTY
+	
 	# generic SSD consts
 
 	# SSD_Command_Mode = 0x80  # DC bit is 0  # Seeed set C0 to 1 why ?
@@ -76,17 +77,23 @@ class OLEDDisplay
 	COLOR_WHITE = 1
 
 	def initialize(device_id = 0x3c)
-		super
-
 		@width = 128
 		@height = 32
 		@device = I2CDevice.new device_id
 
+		initialize_gfx_modules
 		initialize_display
 		
 		@buffer = nil
 		@packet_size_bytes = 32
 		clear_buffer
+
+		self.fill_color = COLOR_WHITE
+	end
+
+	def initialize_gfx_modules
+		DisplayGFX.instance_method(:initialize).bind(self).call
+		DisplayTTY.instance_method(:initialize).bind(self).call
 	end
 
 	def initialize_display
@@ -134,7 +141,7 @@ class OLEDDisplay
 		write_command SSD_Deactivate_Scroll
 
 		# Empty uninitialized buffer
-		write_command SSD_Display_On 
+		write_command SSD_Display_On
 	end
 
 	def write_command(data)

@@ -12,11 +12,11 @@ class BitmapFont
 	@cached_bitmaps = []
 
 	def self.height
-		return @height 
+		return @height
 	end
 
 	def self.line_height
-		self.height + 1
+		self.height
 	end
 
 	def self.glyph(c)

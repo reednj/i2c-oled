@@ -20,7 +20,7 @@ module DisplayGFX
 		self.font = ClassicFont
 		self.font_size = 1
 		self.line_width = 1
-		self.text_align = :center
+		self.text_align = :left
 	end
 	
 	def fill_rect(x, y, w, h)
@@ -97,5 +97,58 @@ module DisplayGFX
 			:y => (self.height / 2).floor
 		}
 	end
+
+end
+
+# if a display already has the GFX methods added (primarily the fill_text method)
+# then this mixin also adds methods for simulating a console - printing lines / chars
+# etc
+#
+# with some other other this can be used to show a shell on the display
+module DisplayTTY
+	attr_accessor :line_height
+	attr_accessor :line_count
+	attr_accessor :chars_per_line
+
+	attr_accessor :current_line
+	attr_accessor :current_char
+
+	def initialize(*args)
+		self.line_height = self.font.line_height 
+		self.line_count = (self.height / self.line_height).floor
+		self.chars_per_line = (self.width / self.font.glyph('a').x_advance).floor
+
+		self.current_line = 0
+		self.current_char = 0
+
+		@line_buffer = []
+	end
+
+	def puts(s)
+		@line_buffer ||= []
+		@line_buffer.push normalize_string(s)
+		truncate_line_buffer
+	end
+
+	def normalize_string(s)
+		s.gsub("\n", '').gsub("\r", '').gsub("\t", ' ')
+	end
+
+	def write_line_buffer
+		@line_buffer.each_with_index do |line, line_no|
+			self.fill_text 0, line_no * line_height + self.font.height, line
+		end
+	end
+
+	def truncate_line_buffer
+		@line_buffer = @line_buffer.last(self.line_count)
+	end
+
+	#def cursor_pos
+	#	{
+	#		:x => 0,
+	#		:y => 0 
+	#	}
+	#end
 
 end

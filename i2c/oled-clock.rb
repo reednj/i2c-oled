@@ -16,10 +16,10 @@ class App
 			d = Time.now.strftime '%Y-%m-%d'
 
 			display.font_size = 1
-			display.fill_text center_point[:x], 1, d
+			display.fill_text center_point[:x], 8, d
 
 			display.font_size = 2
-			display.fill_text center_point[:x], 12, t
+			display.fill_text center_point[:x], 31, t
 			
 		end
 

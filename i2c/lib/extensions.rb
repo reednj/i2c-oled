@@ -20,6 +20,10 @@ class Fixnum
 		self * 7.days
 	end
 
+	def herz
+		1 / self
+	end
+
 	alias second seconds
 	alias minute minutes
 	alias hour hours
