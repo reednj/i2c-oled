@@ -124,6 +124,25 @@ module DisplayTTY
 		@line_buffer = []
 	end
 
+	def print(s)
+		@line_buffer ||= []
+		@line_buffer.push '' if @line_buffer.empty?
+
+		s.gsub("\r", '').gsub("\t", ' ').each_char do |c|
+			self.putc c
+		end
+
+		truncate_line_buffer
+	end
+
+	def putc(c)
+		if c == "\n"
+			@line_buffer.push '' 
+		else
+			@line_buffer.last += c
+		end
+	end
+
 	def puts(s)
 		@line_buffer ||= []
 		@line_buffer.push normalize_string(s)
@@ -151,4 +170,11 @@ module DisplayTTY
 	#	}
 	#end
 
+end
+
+class Array
+	def last=(item)
+		raise 'cannot set last in empty array' if self.empty?
+		self[self.length - 1] = item
+	end
 end

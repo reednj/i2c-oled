@@ -4,14 +4,20 @@ require './lib/oled'
 
 class App
 	def main
+		display = OLEDDisplay.new
+
 		PTY.spawn 'sh' do |r, w, pid|
 			puts 'starting...'
-			sleep(2)
+			sleep(1)
 
 			loop do
 				stream(STDIN, w)
-				stream(r, STDOUT)
+				stream(r, display)
 				sleep(0.1)
+
+				display.write_line_buffer
+				display.write_buffer
+				display.clear_buffer
 			end
 
 		end
