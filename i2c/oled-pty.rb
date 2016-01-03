@@ -4,22 +4,32 @@ require './lib/oled'
 
 class App
 	def main
-		display = OLEDDisplay.new
+		@display = OLEDDisplay.new
 
-		PTY.spawn 'sh' do |r, w, pid|
-			puts 'starting...'
+		begin
+			# we need to set the local tty to raw mode, so that the keystrokes
+			# get sent through to the display without buffering
+			`stty raw -echo`
+
+			start_pty 'sh'
+		rescue Errno::EIO
+			@display.puts 'process finished'
+			@display.flush
+		ensure
+			`stty -raw echo`
+		end
+	end
+
+	def start_pty(cmd)
+		PTY.spawn cmd do |r, w, pid|
+			puts "#{cmd} started as #{pid}...\n\r"
 
 			loop do
 				stream(STDIN, w)
-				stream(r, display)
-				
-				display.write_line_buffer
-				display.write_buffer
-				display.clear_buffer
+				stream(r, @display)
 
-				sleep(0.1)
+				sleep(0.01)
 			end
-
 		end
 	end
 
@@ -49,11 +59,4 @@ class IO
 	end
 end
 
-begin
-	`stty raw -echo`
-	App.new.main
-ensure
-	`stty -raw echo`
-end
-
-
+App.new.main

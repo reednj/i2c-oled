@@ -163,12 +163,11 @@ module DisplayTTY
 		@line_buffer = @line_buffer.last(self.line_count)
 	end
 
-	#def cursor_pos
-	#	{
-	#		:x => 0,
-	#		:y => 0 
-	#	}
-	#end
+	def flush
+		write_line_buffer
+		write_buffer
+		clear_buffer
+	end
 
 end
 
