@@ -33,13 +33,20 @@ class App
 		end
 	end
 
+	# copies characters one by one from 'from' into 'to'
+	# returns once the end of the line has been reached, or a 
+	# maximum number of characters has been copied
 	def stream(from, to)
+		max_chars = 512
 		s = nil
 		c = from.read_c
+
 		while !c.nil?
 			s = '' if s.nil?
 			s += c
 			to.print c
+			
+			break if s.length >= max_chars
 			c = from.read_c
 		end
 
