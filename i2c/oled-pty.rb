@@ -8,27 +8,33 @@ class App
 
 		PTY.spawn 'sh' do |r, w, pid|
 			puts 'starting...'
-			sleep(1)
 
 			loop do
 				stream(STDIN, w)
 				stream(r, display)
-				sleep(0.1)
-
+				
 				display.write_line_buffer
 				display.write_buffer
 				display.clear_buffer
+
+				sleep(0.1)
 			end
 
 		end
 	end
 
 	def stream(from, to)
+		s = nil
 		c = from.read_c
 		while !c.nil?
+			s = '' if s.nil?
+			s += c
 			to.print c
 			c = from.read_c
 		end
+
+		to.flush if to.respond_to? :flush
+		return s
 	end
 
 end
@@ -43,5 +49,11 @@ class IO
 	end
 end
 
-App.new.main
+begin
+	`stty raw -echo`
+	App.new.main
+ensure
+	`stty -raw echo`
+end
+
 
