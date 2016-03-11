@@ -1,5 +1,4 @@
 require 'yaml'
-require './lib/helpers'
 require './lib/oled'
 
 class App

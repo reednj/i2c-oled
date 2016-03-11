@@ -1,5 +1,4 @@
 require 'pty'
-require './lib/helpers'
 require './lib/oled'
 
 class App
