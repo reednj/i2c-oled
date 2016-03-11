@@ -16,7 +16,7 @@ class App
 
 		center_point = display.display_center
 
-		update_loop 0.010 do
+		display.update_loop 0.010 do
 			duration = Time.now - start
 			time_text = duration.round(1)
 

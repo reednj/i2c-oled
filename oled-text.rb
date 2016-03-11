@@ -12,7 +12,7 @@ class App
 		size = 1.0
 		size = ARGV[0].to_f if ARGV.length > 0
 
-		update_loop 0.2 do
+		display.update_loop 0.2 do
 
 			t = Time.now.strftime '%H:%M:%S'
 			display.font_size = size
